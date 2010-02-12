@@ -1,10 +1,8 @@
-Assemblage
-==========
+= Assemblage
 
 Based on the concept {sported by GitHub}[http://github.com/blog/551-optimizing-asset-bundling-and-serving-with-rails], this plugin serves the purpose of making it much easier to package your JavaScript and CSS files together into "bundles", so that they are easy for your clients to download once and cache in their browsers. This is a recommended practice to increase performance of your Rails application dramatically.
 
-Getting Started
-===============
+== Getting Started
 
 There is a simple methodology that needs to be adopted by your application when organising your JavaScript and CSS files:
 
@@ -24,8 +22,7 @@ The directory structure is similar in public/stylesheets, as well. This essentia
 
 The "dev" folder is used locally, and is replaced with a cached version somewhere else on the Internet in production. More on that later...
 
-View Helper Methods
-===================
+== View Helper Methods
 
 You will need to include a couple of helpers in your layout files:
 
@@ -39,13 +36,11 @@ In this instance, there are three helpers: `javascript_dev`, `javascript_bundle`
 * <tt>javascript_bundle</tt> - In development, this method does a recursive search for all files in the namespaces listed and includes the raw, uncompressed files. Otherwise, it will look for "bundle_namespace.js" and include this file, if it exists.
 * <tt>stylesheet_bundle</tt> - Exactly the same as above, but for CSS files.
 
-Compression
-===========
+== Compression
 
 JavaScript compression is handled using the Closure Compiler by Google, which is included in the bin/ directory. CSS compression is handled by YUI Compressor, also included.
 
-Rake Tasks
-==========
+== Rake Tasks
 
 Included Rake tasks are:
 
@@ -53,8 +48,7 @@ Included Rake tasks are:
 * <tt>rake assemble:js</tt> - Only assembles namespaced JavaScript
 * <tt>rake assemble:css</tt> - Only assembles namespaced CSS
 
-Deployment
-==========
+== Deployment
 
 You can handle these tasks on deployment by doing the following:
 
@@ -67,15 +61,13 @@ You can handle these tasks on deployment by doing the following:
 
     after "deploy:update_code", "deploy:assemble"
     
-Issues & Contributions
-======================
+== Issues & Contributions
 
 For all issues and bug/feature requests, please use the GitHub issue tracker:
 
 http://github.com/voxxit/assemblage
 
-Props
-=====
+== Props
 
 Thanks to {Kyle Neath}[http://github.com/kneath] for the inspiration to turn his idea into a useful plugin for all!
 
