@@ -1,0 +1,82 @@
+Assemblage
+==========
+
+Based on the concept {sported by GitHub}[http://github.com/blog/551-optimizing-asset-bundling-and-serving-with-rails], this plugin serves the purpose of making it much easier to package your JavaScript and CSS files together into "bundles", so that they are easy for your clients to download once and cache in their browsers. This is a recommended practice to increase performance of your Rails application dramatically.
+
+Getting Started
+===============
+
+There is a simple methodology that needs to be adopted by your application when organising your JavaScript and CSS files:
+
+    public/javascripts
+    |-- admin
+    | |-- date.js
+    | `-- datePicker.js
+    |-- common
+    | |-- application.js
+    | |-- jquery.tablesorter.js
+    | `-- jquery.editable.js
+    |-- dev
+      |-- jquery-1.4.1.js
+      `-- jquery-ui-1.7.2.js
+      
+The directory structure is similar in public/stylesheets, as well. This essentially namespaces your directories so they are easier to organise. You need to only place files that are used in that specific namespace in the directory. If you use the library in more than one namespace, it should be placed in a "common" folder.
+
+The "dev" folder is used locally, and is replaced with a cached version somewhere else on the Internet in production. More on that later...
+
+View Helper Methods
+===================
+
+You will need to include a couple of helpers in your layout files:
+
+    <%= javascript_dev ['jquery-1.4.1', "http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"] %>
+    <%= javascript_bundle 'common', 'clients' %>
+    <%= stylesheet_bundle 'common', 'clients' %>
+    
+In this instance, there are three helpers: `javascript_dev`, `javascript_bundle` and `stylesheet_bundle`. 
+
+* <tt>javascript_dev</tt> - In development, the files included in the "dev" directory are included. Otherwise, it sets the cached version using the URL.
+* <tt>javascript_bundle</tt> - In development, this method does a recursive search for all files in the namespaces listed and includes the raw, uncompressed files. Otherwise, it will look for "bundle_namespace.js" and include this file, if it exists.
+* <tt>stylesheet_bundle</tt> - Exactly the same as above, but for CSS files.
+
+Compression
+===========
+
+JavaScript compression is handled using the Closure Compiler by Google, which is included in the bin/ directory. CSS compression is handled by YUI Compressor, also included.
+
+Rake Tasks
+==========
+
+Included Rake tasks are:
+
+* <tt>rake assemble:all</tt> - Compresses and bundles both CSS & JavaScript
+* <tt>rake assemble:js</tt> - Only assembles namespaced JavaScript
+* <tt>rake assemble:css</tt> - Only assembles namespaced CSS
+
+Deployment
+==========
+
+You can handle these tasks on deployment by doing the following:
+
+    namespace :deploy do
+      desc "Assemble JavaScript and CSS files"
+      task :assemble, :roles => :web, :except => { :no_release => true } do
+        run "cd #{current_path}; rake assemble:all"
+      end
+    end
+
+    after "deploy:update_code", "deploy:assemble"
+    
+Issues & Contributions
+======================
+
+For all issues and bug/feature requests, please use the GitHub issue tracker:
+
+http://github.com/voxxit/assemblage
+
+Props
+=====
+
+Thanks to {Kyle Neath}[http://github.com/kneath] for the inspiration to turn his idea into a useful plugin for all!
+
+Copyright (c) 2010 Josh Delsman, released under the MIT license
