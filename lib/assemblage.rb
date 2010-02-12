@@ -17,26 +17,26 @@ module Assemblage
       output = ""
       
       bundles.each do |bundle|
-        output << javascript_src_tag("bundle_#{bundle}", {}) + "\n"
+        output << javascript_include_tag("bundle_#{bundle}") + "\n"
       end
       
-      output
+      output.html_safe
     end
 
     def javascript_include_files(bundles)
       output = ""
       
       bundles.each do |bundle|
-        files = recursive_file_list("public/javascripts/#{bundle}", ".js")
+        files = recursive_file_list("javascripts/#{bundle}", ".js")
       
         files.each do |file|
-          file = file.gsub('public/javascripts/', '')
+          file = file.gsub('public/', '')
       
-          output << javascript_src_tag(file, {}) + "\n"
+          output << javascript_include_tag(file) + "\n"
         end
       end
       
-      output
+      output.html_safe
     end
 
     def javascript_dev(*sources)
@@ -44,10 +44,10 @@ module Assemblage
       sources = sources.to_a
       
       sources.each do |pair|
-        output << javascript_src_tag(Rails.env.development? ? "dev/#{pair[0]}" : pair[1], {})
+        output << javascript_include_tag(Rails.env.development? ? "dev/#{pair[0]}" : pair[1]) + "\n"
       end
       
-      output
+      output.html_safe
     end
 
     def stylesheet_bundle(*sources)
@@ -58,28 +58,28 @@ module Assemblage
     # This method assumes you have manually bundled css using a rake command
     # or similar. So, there better be bundle_* files!
     def stylesheet_include_bundles(bundles)
-      stylesheet_link_tag(bundles.collect{ |b| "bundle_#{b}"})
+      stylesheet_link_tag(bundles.collect {|b| "bundle_#{b}"})
     end
 
     def stylesheet_include_files(bundles)
       output = ""
       
       bundles.each do |bundle|
-        files = recursive_file_list("public/stylesheets/#{bundle}", ".css")
+        files = recursive_file_list("stylesheets/#{bundle}", ".css")
       
         files.each do |file|
-          file = file.gsub('public/stylesheets/', '')
-      
-          output << stylesheet_link_tag(file)
+          file = file.gsub('public/', '')
+          
+          output << stylesheet_link_tag(file) + "\n"
         end
       end
       
-      output
+      output.html_safe
     end
 
     def recursive_file_list(basedir, extname)
       files = []
-      basedir = Rails.root.join(basedir)
+      basedir = Rails.root.join("public", basedir)
       
       Find.find(basedir) do |path|
         if FileTest.directory?(path)
