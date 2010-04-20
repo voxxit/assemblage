@@ -52,16 +52,18 @@ namespace :assemble do
   private
   
   def execute_closure(files, bundle_name)
-    jar = File.join(File.dirname(__FILE__), "..", "..", "bin", "closure-compiler.jar")
+    jar = Rails.root.join("vendor", "plugins", "assemblage", "bin", "compiler.jar")
     target = Rails.root.join("public/javascripts/bundle_#{bundle_name}.js")
     
-    `java -jar #{jar} #{files.join(" --js ")} --js_output_file #{target}`
+    files = files.collect { |a| "--js=" + a }
+    
+    `java -jar #{jar} #{files.join(" ")} --js_output_file #{target}`
     
     return target
   end
   
   def execute_yui_compressor(bundle, bundle_name)
-    jar = File.join(File.dirname(__FILE__), "..", "..", "bin", "yui-compressor.jar")
+    jar = Rails.root.join("vendor", "plugins", "assemblage", "bin", "yui-compressor.jar")
     target = Rails.root.join("public/stylesheets/bundle_#{bundle_name}.css")
     temp_file = "/tmp/bundle_raw.css"
     
