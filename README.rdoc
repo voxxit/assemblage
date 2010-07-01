@@ -2,6 +2,10 @@
 
 Based on the concept {sported by GitHub}[http://github.com/blog/551-optimizing-asset-bundling-and-serving-with-rails], this plugin serves the purpose of making it much easier to package your JavaScript and CSS files together into "bundles", so that they are easy for your clients to download once and cache in their browsers. This is a recommended practice to increase performance of your Rails application dramatically.
 
+== Requirements
+
+* Rails v2.3.8 or v3.0.0b4
+
 == Getting Started
 
 There is a simple methodology that needs to be adopted by your application when organising your JavaScript and CSS files:

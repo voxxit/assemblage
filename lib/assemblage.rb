@@ -20,7 +20,7 @@ module Assemblage
         output << javascript_include_tag("bundle_#{bundle}") + "\n"
       end
       
-      output.html_safe!
+      output.html_safe
     end
 
     def javascript_include_files(bundles)
@@ -36,7 +36,7 @@ module Assemblage
         end
       end
       
-      output.html_safe!
+      output.html_safe
     end
 
     def javascript_dev(*sources)
@@ -47,7 +47,7 @@ module Assemblage
         output << javascript_include_tag(Rails.env.development? ? "dev/#{pair[0]}" : pair[1]) + "\n"
       end
       
-      output.html_safe!
+      output.html_safe
     end
 
     def stylesheet_bundle(*sources)
@@ -74,7 +74,7 @@ module Assemblage
         end
       end
       
-      output.html_safe!
+      output.html_safe
     end
 
     def recursive_file_list(basedir, extname)
