@@ -90,7 +90,7 @@ module Assemblage
           end
         end
       
-        files << path.gsub(Rails.root, '') if File.extname(path) == extname
+        files << path.gsub(Rails.root.to_s, '') if File.extname(path) == extname
       end
       
       files.sort
