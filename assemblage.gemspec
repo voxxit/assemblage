@@ -11,10 +11,10 @@ Gem::Specification.new do |spec|
   spec.description    = "Rails plugin to allow for compressing and bundling JavaScript & CSS files for production"
   spec.post_install_message = ""
 
-  spec.files          = Dir["{lib,bin}/**/*", "CHANGELOG", "MIT-LICENSE", "README.rdoc", "Rakefile", "*.gemspec"]
+  spec.files          = Dir["{lib,bin}/**/*", "MIT-LICENSE", "README.rdoc", "Rakefile", "*.gemspec"]
 
   spec.has_rdoc         = true
-  spec.extra_rdoc_files = "README.rdoc", "CHANGELOG"
+  spec.extra_rdoc_files = "README.rdoc"
   spec.rdoc_options     = "--title", "Assemblage #{spec.version}", "--main", "README.rdoc", "--webcvs", spec.homepage
 
   spec.required_ruby_version = '>= 1.8.7'
