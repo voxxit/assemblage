@@ -1,0 +1,18 @@
+PATH
+  remote: .
+  specs:
+    assemblage (0.0.2)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    activesupport (3.0.4)
+    rake (0.8.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activesupport
+  assemblage!
+  rake
