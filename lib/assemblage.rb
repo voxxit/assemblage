@@ -1,6 +1,7 @@
 require 'assemblage/config'
 require 'assemblage/packager'
 require 'assemblage/version'
+require 'assemblage/railtie' if defined?(Rails) && defined?(Rails::Railtie)
 
 module Assemblage
 
