@@ -59,11 +59,23 @@ You can handle these tasks on deployment by doing the following:
     namespace :deploy do
       desc "Assemble JavaScript and CSS files"
       task :assemble, :roles => :web, :except => { :no_release => true } do
-        run "cd #{current_path}; rake assemble:all"
+        run "cd #{release_path}; rake assemble:all"
       end
     end
 
     after "deploy:update_code", "deploy:assemble"
+
+== Assemblage Configuration and Ordering Files within a Bundle
+
+To order the files within each bundle you may create a file config/assemblage.rb within your Rails application that provides the specific list of files and their order. For example:
+  
+ 
+    bundle :widget, :js, 'jquery-1.4.4.min.js', 'jquery-ui-1.8.7.custom.min.js', 'jquery.maskedinput.js', 'raphael-1.5.2.min.js', 'jquery.ba-postmessage.0.5.min.js'
+    bundle :app, :js, 'jquery-1.4.4.min.js', 'jquery-ui-1.8.7.custom.min.js', 'farbtastic'
+    bundle :app, :css, 'site', 'jquery-ui-1.8.7.custom.css', 'farbtastic'
+
+Defines 3 bundles.  The first named 'widget' that is a JavaScript bundle that includes 5 files in the order specified, the second 'app' another JavaScript bundle including 3 files in the given order and the last one 'app' a CSS bundle providing 3 css files in the given order.
+Any bundle not listed in the configuration file will order the included files in alphabetical order.
     
 == Issues & Contributions
 
