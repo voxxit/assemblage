@@ -10,6 +10,7 @@ Gem::Specification.new do |spec|
   spec.summary        = "Rails plugin to allow for compressing and bundling JavaScript & CSS files for production"
   spec.description    = "Rails plugin to allow for compressing and bundling JavaScript & CSS files for production"
   spec.post_install_message = ""
+  spec.require_paths = ['lib']
 
   spec.files          = Dir["{lib,bin}/**/*", "MIT-LICENSE", "README.rdoc", "Rakefile", "*.gemspec"]
 
