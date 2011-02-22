@@ -6,14 +6,16 @@ namespace :assemble do
   task :all => [ :js, :css ]
  
   task :js do
-    Assemblage::Packager.new.package_js.each do |target|
+    targets = Assemblage::Packager.new.package_js.each do |target|
       puts "=> Assembled JavaScript at: #{target}"
     end
+    File.open(File.join(Rails.root,'config/assembled.js.yml'), 'wb') {|f| f <<  YAML.dump(targets) }
   end
  
   task :css do
-    Assemblage::Packager.new.package_css.each do |target|
+    targets = Assemblage::Packager.new.package_css.each do |target|
       puts "=> Assembled CSS at: #{target}"
     end
+    File.open(File.join(Rails.root,'config/assembled.css.yml'), 'wb') {|f| f <<  YAML.dump(targets) }
   end
 end
