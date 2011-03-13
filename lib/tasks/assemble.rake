@@ -18,4 +18,25 @@ namespace :assemble do
     end
     File.open(File.join(Rails.root,'config/assembled.css.yml'), 'wb') {|f| f <<  YAML.dump(targets) }
   end
+
+  desc "Given an assemblage configuration file, setup the correct directory strucutre and copy all css and js files into the each bundle folder"
+  task :setup do
+    if !File.exist?(Rails.root + "config/assemblage.rb")
+      STDERR.puts "Unforuntately this command will only work if you have an config/assemblage.rb file."
+      exit(1)
+    end
+    begin
+      config = Assemblage::Config.new(Rails.root + "config/assemblage.rb")
+    rescue Assemblage::Config::MissingFile => e
+      original_filepath = e.filepath.gsub(e.bundle.to_s + '/','')
+      if File.exist?(original_filepath)
+        FileUtils.mkdir_p(File.dirname(e.filepath))
+        FileUtils.cp(original_filepath,e.filepath)
+        puts "copy #{File.basename(original_filepath)} to #{e.bundle}"
+        retry
+      else
+        raise "Unable to determine orgiinal file path of expected: #{e.filepath} in bundle: #{e.bundle}"
+      end
+    end
+  end
 end
