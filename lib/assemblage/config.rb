@@ -4,6 +4,11 @@ module Assemblage
 
   class Config
     VALID_TYPES = [:js,:css]
+
+    class Error < Exception ; end
+    class MissingFile < Error
+      attr_accessor :filepath, :bundle
+    end
     
     def initialize(assemblage_path)
       @bundles = {} # named bundles
@@ -14,13 +19,18 @@ module Assemblage
     # configure the bundle to be explicit
     #
     def bundle(bundle_name, type, *filelist)
-      raise "Invalid bundle type, must be one of #{VALID_TYPES.inspect}" unless VALID_TYPES.include?(type)
+      raise Error.new("Invalid bundle type, must be one of #{VALID_TYPES.inspect}") unless VALID_TYPES.include?(type)
       # verify ordered files exist
       basedir = type_to_path(type)
       filelist.each do|name|
         path = File.join(basedir, bundle_name.to_s, name)
         path << ".#{type.to_s}" unless path.match(/\.#{type.to_s}$/)
-        raise "Missing reference to file: #{name} at #{path}" unless File.exist?(path)
+        unless File.exist?(path)
+          error = MissingFile.new("Missing reference to file: #{name} at #{path}")
+          error.filepath = path
+          error.bundle = bundle_name
+          raise error
+        end
 
         # add a reference
         @bundles[type] ||= {}
@@ -34,7 +44,7 @@ module Assemblage
     end
 
     def bundled_list(bundle_name, type)
-      raise "#{bundle_name} not ordered" unless has_order? bundle_name, type
+      raise Error.new("#{bundle_name} not ordered") unless has_order? bundle_name, type
       @bundles[type][bundle_name]
     end
 
@@ -114,7 +124,7 @@ module Assemblage
     def evaluate(assemblage_path)
       self.instance_eval(File.read(assemblage_path), assemblage_path, 0)
     rescue => e
-      raise "Config error: '#{e.message}' at #{e.backtrace[0].gsub(/:in `run'/,'')}"
+      raise Error.new("Config error: '#{e.message}' at #{e.backtrace[0].gsub(/:in `run'/,'')}")
     end
 
   end
