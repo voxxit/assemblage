@@ -3,6 +3,12 @@ require 'test_helper'
 class AssemblageTest < ActiveSupport::TestCase
   WIDGET_JSLIST = ['jquery-1.4.4.min.js', 'jquery-ui-1.8.7.custom.min.js', 'jquery.maskedinput-1.2.2.min.js', 'raphael-1.5.2.min.js', 'jquery.ba-postmessage.0.5.min.js']
 
+  test "configuration exceptions" do
+    assert_raises Assemblage::Config::Error do
+      raise Assemblage::Config::Error.new("raise")
+    end
+  end
+
   test "configuration loader" do
     config = Assemblage::Config.load_config_instance
 
