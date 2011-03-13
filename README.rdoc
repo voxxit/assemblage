@@ -83,6 +83,10 @@ For all issues and bug/feature requests, please use the GitHub issue tracker:
 
 http://github.com/voxxit/assemblage
 
+== Additional documentation
+
+Very helpful article:  {Static Asset Bundling with Ruby on Rails By: Todd Fisher}[http://captico.com/static-asset-bundling-with-ruby-on-rails/2011/02].
+
 == Props
 
 Thanks to {Kyle Neath}[http://github.com/kneath] for the inspiration to turn his idea into a useful plugin for all!
