@@ -14,7 +14,6 @@ Gem::Specification.new do |spec|
 
   spec.files          = Dir["{lib,bin}/**/*", "MIT-LICENSE", "README.rdoc", "Rakefile", "*.gemspec"]
 
-  spec.has_rdoc         = true
   spec.extra_rdoc_files = "README.rdoc"
   spec.rdoc_options     = "--title", "Assemblage #{spec.version}", "--main", "README.rdoc", "--webcvs", spec.homepage
 
