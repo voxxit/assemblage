@@ -1,18 +1,40 @@
 require 'find'
+require 'assemblage/rails2-compat'
 
 module Assemblage
 
   class Config
+    attr_reader :basedir, :bundles, :level, :logging, :java
+
     VALID_TYPES = [:js,:css]
 
     class Error < Exception ; end
     class MissingFile < Error
       attr_accessor :filepath, :bundle
     end
-    
-    def initialize(assemblage_path)
+ 
+    def initialize(assemblage_config_path=nil)
       @bundles = {} # named bundles
-      evaluate assemblage_path 
+      @level = "SIMPLE_OPTIMIZATIONS"
+      @logging = "DEFAULT"
+      @java = "/usr/bin/java"
+      assemblage_config_path=File.join(Rails.root,'config/assemblage.rb') if assemblage_config_path.nil?
+      @basedir = File.expand_path(File.join(Rails.root,"public"))
+      #puts "load config file at: #{assemblage_config_path.inspect}"
+      evaluate assemblage_config_path 
+    end
+
+    #
+    # change default base dir from public/  to something different e.g. public/foo/
+    # if path is relative it will be assumed relative from Rails.root
+    #
+    def basedir(basedir)
+      @basedir = basedir
+      @basedir = File.expand_path(File.join(Rails.root, @basedir)) if !@basedir.match(/^\//)
+    end
+
+    def base_path
+      @basedir
     end
 
     #
@@ -39,6 +61,23 @@ module Assemblage
       end
     end
 
+    # valid levels, :simple, :whitespace, :advanced
+    def closure(level, logging=:default)
+      @level = {:simple => "SIMPLE_OPTIMIZATIONS",
+                :whitespace => "WHITESPACE_ONLY",
+                :advanced => "ADVANCED_OPTIMIZATIONS"}[level]
+      raise "Unknown closure runtime level, should be one of :simple, :whitespace, or :advanced" if @level.blank?
+
+      @logging = { :quiet => "QUIET",
+                   :default => 'DEFAULT',
+                   :verbose => 'VERBOSE'}[logging]
+      raise "Unknown logging level, should be one of :quiet, :default, or :verbose" if @logging.blank?
+    end
+
+    def java(path_to_java="/usr/bin/java")
+      @java = path_to_java
+    end
+
     def has_order?(bundle_name, type)
       @bundles.key?(type.to_sym) && @bundles[type.to_sym].key?(bundle_name.to_sym)
     end
@@ -48,10 +87,10 @@ module Assemblage
       @bundles[type][bundle_name]
     end
 
-    def self.recursive_file_list(basedir, extname, load_config=true)
+    def recursive_file_list(basedir, extname, load_config=true)
       files = []
       basedir = Rails.root.join("public", basedir)
-      config = load_config_instance if load_config
+      config = Config.load_config_instance if load_config
 
       extname.sub!(/^\./,'') # remove any leading .
 
@@ -97,7 +136,9 @@ module Assemblage
 
     def self.load_config_instance
       return nil if ENV["ASSEMBLAGE_NO_CONFIG"] == "1"
-      config_path = File.join(Rails.root,'config','assemblage.rb')
+      config_path = ENV["ASSEMBLAGE_CONFIG_PATH"] if ENV["ASSEMBLAGE_CONFIG_PATH"].present?
+      config_path = File.join(Rails.root,'config','assemblage.rb') if config_path.blank?
+      #puts "Using config_path: #{config_path.inspect}"
       if File.exist?(config_path)
         if Rails.env == 'development'
           @assemblage_config = Config.new(config_path)
@@ -105,14 +146,14 @@ module Assemblage
           @assemblage_config ||= Config.new(config_path)
         end
       else
-        nil
+        raise "#{config_path.inspect} not found"
       end
     end
 
   private
     
     def type_to_path(type)
-      basedir = File.join(Rails.root,"public")
+      basedir = @basedir
       case type
       when :js
         File.join(basedir,"javascripts") 

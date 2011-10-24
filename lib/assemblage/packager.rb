@@ -3,14 +3,19 @@ require 'assemblage/config'
 module Assemblage
 
   class Packager
+    attr_reader :config
+
+    def initialize(config_path=nil)
+      @config = Assemblage::Config.new(config_path)
+    end
 
     def package_js
-      paths = get_top_level_directories("public/javascripts")
+      paths = get_top_level_directories(:javascripts)
       targets = []
 
       paths.each do |bundle_directory|
         bundle_name = bundle_directory.basename
-        files = recursive_file_list(bundle_directory, ".js")
+        files       = recursive_file_list(bundle_directory, ".js")
 
         next if files.empty? || bundle_name == "dev"
 
@@ -23,7 +28,7 @@ module Assemblage
     end
 
     def package_css
-      paths = get_top_level_directories("public/stylesheets")
+      paths = get_top_level_directories(:stylesheets)
       targets = []
 
       paths.each do |bundle_directory|
@@ -54,8 +59,9 @@ module Assemblage
 
       files = files.collect { |a| "--js=" + a }
 
-      # TODO: add java path to the config/assemblage.rb file
-      `java -jar #{jar} #{files.join(" ")} --js_output_file #{target}`
+      cmd = "#{@config.java} -jar #{jar} #{files.join(" ")} --compilation_level #{@config.level} --warning_level #{@config.logging} --js_output_file #{target}"
+      puts cmd.inspect if @config.logging == "VERBOSE"
+      system(cmd)
 
       return target
     end
@@ -67,19 +73,18 @@ module Assemblage
 
       File.open(temp_file, 'w') { |f| f.write(bundle) }
 
-      # TODO: add java path to the config/assemblage.rb file
-      `java -jar #{jar} --line-break 0 #{temp_file} -o #{target}`
+      `#{@config.java} -jar #{jar} --line-break 0 #{temp_file} -o #{target}`
 
       return target
     end
 
     def recursive_file_list(basedir, extname)
-      Config.recursive_file_list(basedir, extname)
+      @config.recursive_file_list(basedir, extname)
     end
 
-    def get_top_level_directories(base_path)
-      Dir.entries(Rails.root.join(base_path)).collect do |path|
-        path = Rails.root.join("#{base_path}/#{path}")
+    def get_top_level_directories(type)
+      Dir.entries(Rails.root.join(@config.base_path, type.to_s)).collect do |path|
+        path = Rails.root.join("#{@config.base_path}/#{type}/#{path}")
 
         File.basename(path)[0] == ?. || !File.directory?(path) ? nil : Pathname.new(path) # not dot directories or files
       end - [nil]

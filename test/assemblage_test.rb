@@ -3,13 +3,17 @@ require 'test_helper'
 class AssemblageTest < ActiveSupport::TestCase
   WIDGET_JSLIST = ['jquery-1.4.4.min.js', 'jquery-ui-1.8.7.custom.min.js', 'jquery.maskedinput-1.2.2.min.js', 'raphael-1.5.2.min.js', 'jquery.ba-postmessage.0.5.min.js']
 
-  test "configuration exceptions" do
-    assert_raises Assemblage::Config::Error do
-      raise Assemblage::Config::Error.new("raise")
+  def test_configuration_exceptions
+    assert_raises Assemblage::Config::MissingFile do
+      config = Assemblage::Config.new(File.join(File.dirname(__FILE__), 'config/assemblage-config-error.rb'))
     end
   end
 
-  test "configuration loader" do
+  def test_configuration_loader_alternative_basedir
+    config = Assemblage::Config.new(File.join(File.dirname(__FILE__), 'config/assemblage-alt.rb'))
+  end
+
+  def test_configuration_loader
     config = Assemblage::Config.load_config_instance
 
     assert config.has_order? :widget, :js
@@ -25,10 +29,13 @@ class AssemblageTest < ActiveSupport::TestCase
       end
     end
 
+    assert_equal "WHITESPACE_ONLY", config.level
+    assert_equal "QUIET", config.logging
+
   end
 
-  test "can list files recursivesly with and without a configuration file" do
-    files = Assemblage::Config.recursive_file_list(Rails.root.join("public/javascripts/widget"), "js", false)
+  def test_can_list_files_recursivesly_with_and_without_a_configuration_file
+    files = Assemblage::Config.new.recursive_file_list(Rails.root.join("public/javascripts/widget"), "js", false)
 
     assert_equal WIDGET_JSLIST.size, files.size
 
@@ -36,7 +43,7 @@ class AssemblageTest < ActiveSupport::TestCase
       assert files.map{|f| File.basename(f) }.include?(name), "Missing expected file: #{name}"
     end
 
-    files = Assemblage::Config.recursive_file_list(Rails.root.join("public/javascripts/widget"), "js", true)
+    files = Assemblage::Config.new.recursive_file_list(Rails.root.join("public/javascripts/widget"), "js", true)
 
     assert_equal WIDGET_JSLIST.size, files.size
 
@@ -46,32 +53,35 @@ class AssemblageTest < ActiveSupport::TestCase
 
   end
 
-  test "assemblage assembles with config" do
+  def test_assemblage_assembles_with_config
     assemblage_package
   end
 
-  test "assemblage assembles without config" do
+  def test_assemblage_assembles_without_config
     ENV["ASSEMBLAGE_NO_CONFIG"] = "1"
     assemblage_package
     ENV.delete("ASSEMBLAGE_NO_CONFIG")
   end
 
   def assemblage_package
-    File.unlink "test/public/javascripts/bundle_app.js" if File.exist?("test/public/javascripts/bundle_app.js")
-    File.unlink "test/public/javascripts/bundle_widget.js" if File.exist?("test/public/javascripts/bundle_widget.js")
+    app_bundle    = "test/public/javascripts/bundle_app.js"
+    widget_bundle = "test/public/javascripts/bundle_widget.js"
+
+    File.unlink app_bundle if File.exist?(app_bundle)
+    File.unlink widget_bundle if File.exist?(widget_bundle)
 
     packager = Assemblage::Packager.new
     packager.package_js
 
-    assert File.exist?("test/public/javascripts/bundle_app.js")
-    assert File.exist?("test/public/javascripts/bundle_widget.js")
+    assert File.exist?(app_bundle)
+    assert File.exist?(widget_bundle)
 
-    assert File.size("test/public/javascripts/bundle_app.js") >= 281196
-    assert File.size("test/public/javascripts/bundle_widget.js") >= 342264 
+    assert File.size(app_bundle) >= 270000, "bundle_app.js looks too small?"
+    assert File.size(widget_bundle) >= 330000, "bundle_widget.js looks too small?"
 
   ensure
-    File.unlink "test/public/javascripts/bundle_app.js" if File.exist?("test/public/javascripts/bundle_app.js")
-    File.unlink "test/public/javascripts/bundle_widget.js" if File.exist?("test/public/javascripts/bundle_widget.js")
+    File.unlink app_bundle if File.exist?(app_bundle)
+    File.unlink widget_bundle if File.exist?(widget_bundle)
   end
 
 end
