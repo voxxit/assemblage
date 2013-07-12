@@ -1,6 +1,10 @@
-require 'find'
+require 'assemblage/config'
+require 'assemblage/packager'
+require 'assemblage/version'
+require 'assemblage/railtie' if defined?(Rails) && defined?(Rails::Railtie)
 
 module Assemblage
+
   module ViewHelpers
     def bundle_files?
       Rails.env.production? || Rails.env.staging? || params[:bundle] || cookies[:bundle] == "yes"
@@ -78,22 +82,11 @@ module Assemblage
     end
 
     def recursive_file_list(basedir, extname)
-      files = []
-      basedir = Rails.root.join("public", basedir)
-      
-      Find.find(basedir) do |path|
-        if FileTest.directory?(path)
-          if File.basename(path)[0] == ?.
-            Find.prune
-          else
-            next
-          end
-        end
-      
-        files << path.gsub(Rails.root.to_s, '') if File.extname(path) == extname
+      Config.recursive_file_list(basedir, extname) do|path|
+        path.gsub(Rails.root.to_s, '')
       end
-      
-      files.sort
     end
+
+
   end
 end
